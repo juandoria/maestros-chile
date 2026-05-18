@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { FaStar, FaMapMarkerAlt } from 'react-icons/fa';
+import { useResponsive } from '../hooks/useResponsive';
 
 const ICONOS = {
   'Electricista': '⚡', 'Gasfíter': '🔧', 'Carpintero': '🪚',
@@ -9,6 +10,7 @@ const ICONOS = {
 
 function TodosMaestros({ maestros }) {
   const navigate = useNavigate();
+  const { isMobile } = useResponsive();
 
   if (!maestros || maestros.length === 0) return null;
 
@@ -20,7 +22,12 @@ function TodosMaestros({ maestros }) {
 
         <div style={s.lista}>
           {maestros.map((m) => (
-            <div key={m.id} style={s.fila}>
+            <div key={m.id} style={{
+              ...s.fila,
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: isMobile ? 'flex-start' : 'center',
+              gap: isMobile ? 14 : 0,
+            }}>
               <div style={s.filaIzq}>
                 <div style={s.avatar}>{m.nombre?.[0]}</div>
                 <div>
@@ -31,7 +38,13 @@ function TodosMaestros({ maestros }) {
                   </p>
                 </div>
               </div>
-              <div style={s.filaDer}>
+              <div style={{
+                ...s.filaDer,
+                alignItems: isMobile ? 'flex-start' : 'flex-end',
+                flexDirection: isMobile ? 'row' : 'column',
+                flexWrap: 'wrap',
+                width: isMobile ? '100%' : 'auto',
+              }}>
                 <span style={s.calificacion}>
                   <FaStar size={15} color="#EF9F27" />
                   &nbsp;{m.calificacion > 0 ? m.calificacion.toFixed(1) : '—'}
@@ -47,10 +60,7 @@ function TodosMaestros({ maestros }) {
           ))}
         </div>
 
-        <button
-          onClick={() => navigate('/maestros')}
-          style={s.botonVerTodos}
-        >
+        <button onClick={() => navigate('/maestros')} style={s.botonVerTodos}>
           Ver todos los maestros →
         </button>
       </div>
@@ -63,17 +73,15 @@ const s = {
   inner: { maxWidth: 900, margin: '0 auto', textAlign: 'center' },
   titulo: { fontSize: 30, fontWeight: '800', color: '#0f2a22', margin: '0 0 10px' },
   subtitulo: { fontSize: 18, color: '#4b7062', marginBottom: 36 },
-
   lista: { display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32, textAlign: 'left' },
   fila: {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    display: 'flex', justifyContent: 'space-between',
     backgroundColor: '#ffffff', border: '2px solid #b7e4ce',
     borderRadius: 14, padding: '16px 20px',
     boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
   },
   filaIzq: { display: 'flex', alignItems: 'center', gap: 14 },
-  filaDer: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 },
-
+  filaDer: { display: 'flex', gap: 8 },
   avatar: {
     width: 52, height: 52, borderRadius: '50%',
     backgroundColor: '#1D9E75', color: '#ffffff',
@@ -94,8 +102,7 @@ const s = {
   },
   botonVerTodos: {
     padding: '14px 36px', backgroundColor: '#1D9E75', color: '#ffffff',
-    border: 'none', borderRadius: 10, fontSize: 18, fontWeight: '700',
-    cursor: 'pointer',
+    border: 'none', borderRadius: 10, fontSize: 18, fontWeight: '700', cursor: 'pointer',
   },
 };
 

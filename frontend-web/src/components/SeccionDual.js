@@ -179,14 +179,14 @@ function SeccionDual({ maestros }) {
 const s = {
   seccion: { backgroundColor: '#ffffff', padding: '64px 24px', borderTop: '2px solid #b7e4ce' },
   inner: {
-    maxWidth: 1100, margin: '0 auto',
-    display: 'flex', gap: 40, alignItems: 'flex-start',
+    maxWidth: 1200, margin: '0 auto',
+    display: 'flex', flexWrap: 'wrap', gap: 40, alignItems: 'flex-start',
   },
 
   /* columnas */
-  columnaIzq:      { flex: 1, minWidth: 0 },
-  columnaDer:      { flex: 1, minWidth: 0 },
-  columnaProducts: { flex: '0 0 220px', minWidth: 0 },
+  columnaIzq:      { flex: '1 1 280px', minWidth: 0 },
+  columnaDer:      { flex: '1 1 280px', minWidth: 0 },
+  columnaProducts: { flex: '1 1 220px', minWidth: 0 },
 
   /* productos auspiciados */
   productosLista: { display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 },

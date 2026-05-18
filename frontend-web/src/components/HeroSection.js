@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaMapMarkerAlt } from 'react-icons/fa';
+import { useResponsive } from '../hooks/useResponsive';
 
 const SUGERENCIAS = [
   'Electricista', 'Gasfíter', 'Carpintero', 'Pintor',
@@ -12,6 +13,7 @@ function HeroSection() {
   const [ubicacion, setUbicacion] = useState('');
   const [detectando, setDetectando] = useState(false);
   const navigate = useNavigate();
+  const { isMobile } = useResponsive();
 
   const handleBuscar = (e) => {
     e.preventDefault();
@@ -39,30 +41,40 @@ function HeroSection() {
   };
 
   return (
-    <section style={s.hero}>
+    <section style={{ ...s.hero, padding: isMobile ? '40px 16px 32px' : '64px 24px 56px' }}>
       <div style={s.inner}>
-        <h1 style={s.titulo}>¿Qué maestro necesitas hoy?</h1>
-        <p style={s.subtitulo}>
+        <h1 style={{ ...s.titulo, fontSize: isMobile ? 28 : 40 }}>
+          ¿Qué maestro necesitas hoy?
+        </h1>
+        <p style={{ ...s.subtitulo, fontSize: isMobile ? 16 : 20, marginBottom: isMobile ? 24 : 36 }}>
           Gasfíter, electricista, carpintero y más — cerca de ti
         </p>
 
         <form onSubmit={handleBuscar} style={s.buscadorFila}>
           <div style={s.inputWrapper}>
-            <FaSearch style={s.inputIcono} size={20} color="#1D9E75" />
+            <FaSearch style={s.inputIcono} size={isMobile ? 17 : 20} color="#1D9E75" />
             <input
               list="oficios-list"
               type="text"
               placeholder="¿Qué necesita? Ej: Gasfíter"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              style={s.input}
+              style={{
+                ...s.input,
+                padding: isMobile ? '14px 14px 14px 40px' : '18px 18px 18px 48px',
+                fontSize: isMobile ? 16 : 19,
+              }}
               autoComplete="off"
             />
             <datalist id="oficios-list">
               {SUGERENCIAS.map((o) => <option key={o} value={o} />)}
             </datalist>
           </div>
-          <button type="submit" style={s.botonBuscar}>
+          <button type="submit" style={{
+            ...s.botonBuscar,
+            padding: isMobile ? '0 18px' : '0 32px',
+            fontSize: isMobile ? 16 : 19,
+          }}>
             Buscar
           </button>
         </form>
@@ -83,49 +95,29 @@ function HeroSection() {
 }
 
 const s = {
-  hero: {
-    backgroundColor: '#E1F5EE',
-    padding: '64px 24px 56px',
-    borderBottom: '3px solid #b7e4ce',
-  },
+  hero: { backgroundColor: '#E1F5EE', borderBottom: '3px solid #b7e4ce' },
   inner: { maxWidth: 760, margin: '0 auto', textAlign: 'center' },
-  titulo: {
-    fontSize: 40, fontWeight: '900', color: '#0f2a22',
-    margin: '0 0 14px', lineHeight: 1.15,
-  },
-  subtitulo: {
-    fontSize: 20, color: '#4b7062', margin: '0 0 36px',
-  },
+  titulo: { fontWeight: '900', color: '#0f2a22', margin: '0 0 14px', lineHeight: 1.15 },
+  subtitulo: { color: '#4b7062', margin: 0 },
   buscadorFila: {
     display: 'flex', gap: 0, borderRadius: 12,
     boxShadow: '0 4px 20px rgba(29,158,117,0.25)',
-    overflow: 'hidden',
-    border: '2px solid #1D9E75',
+    overflow: 'hidden', border: '2px solid #1D9E75',
     backgroundColor: '#ffffff',
   },
   inputWrapper: { flex: 1, position: 'relative', display: 'flex', alignItems: 'center' },
-  inputIcono: { position: 'absolute', left: 16, pointerEvents: 'none' },
-  input: {
-    width: '100%', padding: '18px 18px 18px 48px',
-    fontSize: 19, border: 'none', outline: 'none',
-    backgroundColor: 'transparent', color: '#0f2a22',
-    fontFamily: 'inherit',
-  },
+  inputIcono: { position: 'absolute', left: 14, pointerEvents: 'none' },
+  input: { width: '100%', border: 'none', outline: 'none', backgroundColor: 'transparent', color: '#0f2a22', fontFamily: 'inherit' },
   botonBuscar: {
-    padding: '0 32px',
     backgroundColor: '#1D9E75', color: '#ffffff',
-    border: 'none', cursor: 'pointer',
-    fontSize: 19, fontWeight: '800',
-    whiteSpace: 'nowrap',
-    flexShrink: 0,
+    border: 'none', cursor: 'pointer', fontWeight: '800', whiteSpace: 'nowrap', flexShrink: 0,
   },
   ubicacionFila: { marginTop: 18 },
   botonUbicacion: {
     display: 'inline-flex', alignItems: 'center', gap: 6,
-    background: 'none', border: 'none',
-    color: '#1D9E75', fontSize: 17, fontWeight: '700',
-    cursor: 'pointer', padding: '6px 12px',
-    borderRadius: 8, textDecoration: 'underline',
+    background: 'none', border: 'none', color: '#1D9E75',
+    fontSize: 17, fontWeight: '700', cursor: 'pointer',
+    padding: '6px 12px', borderRadius: 8, textDecoration: 'underline',
   },
   ubicacionTexto: { fontSize: 17, color: '#1D9E75', fontWeight: '700' },
 };
