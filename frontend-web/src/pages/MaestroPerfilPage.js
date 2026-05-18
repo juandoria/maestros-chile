@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaStar, FaMapMarkerAlt, FaWhatsapp } from 'react-icons/fa';
 import { getMaestroById } from '../services/api';
+import { useResponsive } from '../hooks/useResponsive';
 
 const ICONOS = {
   'Electricista': '⚡', 'Gasfíter': '🔧', 'Carpintero': '🪚',
@@ -28,6 +29,7 @@ function MaestroPerfilPage() {
   const [maestro, setMaestro] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const { isMobile } = useResponsive();
 
   useEffect(() => {
     getMaestroById(id)
@@ -55,22 +57,34 @@ function MaestroPerfilPage() {
   );
 
   return (
-    <div style={s.pagina}>
+    <div style={{ ...s.pagina, padding: isMobile ? '24px 16px 60px' : '32px 24px 80px' }}>
       <button onClick={() => navigate(-1)} style={s.botonVolver}>
         ← Volver a resultados
       </button>
 
       {/* Tarjeta principal */}
       <div style={s.tarjeta}>
-        <div style={s.encabezado}>
-          <div style={s.avatar}>{maestro.nombre?.[0]}</div>
+        <div style={{
+          ...s.encabezado,
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'center' : 'flex-start',
+          textAlign: isMobile ? 'center' : 'left',
+        }}>
+          <div style={{
+            ...s.avatar,
+            width: isMobile ? 64 : 80,
+            height: isMobile ? 64 : 80,
+            fontSize: isMobile ? 28 : 36,
+          }}>
+            {maestro.nombre?.[0]}
+          </div>
           <div style={{ flex: 1 }}>
-            <h1 style={s.nombre}>{maestro.nombre}</h1>
+            <h1 style={{ ...s.nombre, fontSize: isMobile ? 22 : 26 }}>{maestro.nombre}</h1>
             <p style={s.oficio}>
               <span>{ICONOS[maestro.oficio] || '🔧'}</span>
               &nbsp;{maestro.oficio}
             </p>
-            <p style={s.ubicacion}>
+            <p style={{ ...s.ubicacion, justifyContent: isMobile ? 'center' : 'flex-start' }}>
               <FaMapMarkerAlt size={15} color="#1D9E75" /> &nbsp;{maestro.comuna}
             </p>
             <div style={{ marginTop: 10 }}>
@@ -87,7 +101,9 @@ function MaestroPerfilPage() {
       {/* Precio */}
       <div style={s.seccion}>
         <p style={s.seccionLabel}>💰 Precio por hora</p>
-        <p style={s.precioValor}>${maestro.precioPorHora?.toLocaleString('es-CL')} CLP</p>
+        <p style={{ ...s.precioValor, fontSize: isMobile ? 28 : 34 }}>
+          ${maestro.precioPorHora?.toLocaleString('es-CL')} CLP
+        </p>
       </div>
 
       {/* Descripción */}
@@ -115,9 +131,9 @@ function MaestroPerfilPage() {
         href={`https://wa.me/56?text=${mensajeWsp}`}
         target="_blank"
         rel="noreferrer"
-        style={s.botonWsp}
+        style={{ ...s.botonWsp, fontSize: isMobile ? 18 : 21, padding: isMobile ? '16px 20px' : '20px 32px' }}
       >
-        <FaWhatsapp size={26} />
+        <FaWhatsapp size={isMobile ? 22 : 26} />
         &nbsp; Contactar por WhatsApp
       </a>
 
@@ -129,7 +145,7 @@ function MaestroPerfilPage() {
 }
 
 const s = {
-  pagina: { maxWidth: 640, margin: '0 auto', padding: '32px 24px 80px', minHeight: 'calc(100vh - 140px)' },
+  pagina: { maxWidth: 640, margin: '0 auto', minHeight: 'calc(100vh - 140px)' },
   centrado: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', padding: 24, textAlign: 'center' },
   cargando: { fontSize: 22, color: '#4b7062' },
   errorTexto: { fontSize: 18, color: '#dc2626', lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: 20 },
@@ -143,13 +159,13 @@ const s = {
     borderRadius: 18, padding: 24, marginBottom: 18,
     boxShadow: '0 2px 10px rgba(0,0,0,0.07)',
   },
-  encabezado: { display: 'flex', gap: 20, alignItems: 'flex-start', marginBottom: 18 },
+  encabezado: { display: 'flex', gap: 20, marginBottom: 18 },
   avatar: {
-    width: 80, height: 80, borderRadius: '50%', backgroundColor: '#1D9E75',
-    color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: 36, fontWeight: '800', flexShrink: 0,
+    borderRadius: '50%', backgroundColor: '#1D9E75', color: '#fff',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontWeight: '800', flexShrink: 0,
   },
-  nombre: { fontSize: 26, fontWeight: '800', color: '#0f2a22', margin: '0 0 6px' },
+  nombre: { fontWeight: '800', color: '#0f2a22', margin: '0 0 6px' },
   oficio: { fontSize: 19, color: '#0f2a22', margin: '0 0 4px', fontWeight: '600' },
   ubicacion: { display: 'flex', alignItems: 'center', fontSize: 16, color: '#4b7062', margin: 0 },
   badgeDisponible: {
@@ -167,7 +183,7 @@ const s = {
     borderRadius: 16, padding: '18px 24px', marginBottom: 16,
   },
   seccionLabel: { fontSize: 17, color: '#4b7062', margin: '0 0 8px', fontWeight: '700' },
-  precioValor: { fontSize: 34, fontWeight: '900', color: '#1D9E75', margin: 0 },
+  precioValor: { fontWeight: '900', color: '#1D9E75', margin: 0 },
   descripcion: { fontSize: 18, color: '#0f2a22', lineHeight: 1.7, margin: 0 },
   chips: { display: 'flex', flexWrap: 'wrap', gap: 8 },
   chip: {
@@ -178,8 +194,7 @@ const s = {
   botonWsp: {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     textDecoration: 'none', backgroundColor: '#1D9E75', color: '#ffffff',
-    borderRadius: 14, padding: '20px 32px',
-    fontSize: 21, fontWeight: '800',
+    borderRadius: 14, fontWeight: '800',
     boxShadow: '0 4px 16px rgba(29,158,117,0.35)',
     marginBottom: 14,
   },

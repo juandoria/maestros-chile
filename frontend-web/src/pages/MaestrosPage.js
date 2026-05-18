@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { FaStar, FaMapMarkerAlt } from 'react-icons/fa';
 import { getMaestros } from '../services/api';
+import { useResponsive } from '../hooks/useResponsive';
 
 const ICONOS = {
   'Electricista': '⚡', 'Gasfíter': '🔧', 'Carpintero': '🪚',
@@ -15,6 +16,7 @@ function MaestrosPage() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { isMobile } = useResponsive();
 
   const oficio = searchParams.get('oficio') || '';
   const comuna = searchParams.get('comuna') || '';
@@ -50,11 +52,13 @@ function MaestrosPage() {
   }
 
   return (
-    <div style={s.pagina}>
-      <div style={s.encabezado}>
-        <span style={{ fontSize: 44 }}>{ICONOS[oficio] || '🔧'}</span>
+    <div style={{ ...s.pagina, padding: isMobile ? '24px 16px 60px' : '36px 24px 80px' }}>
+      <div style={{ ...s.encabezado, gap: isMobile ? 10 : 16 }}>
+        <span style={{ fontSize: isMobile ? 32 : 44 }}>{ICONOS[oficio] || '🔧'}</span>
         <div>
-          <h2 style={s.titulo}>{oficio || 'Todos los maestros'}</h2>
+          <h2 style={{ ...s.titulo, fontSize: isMobile ? 22 : 30 }}>
+            {oficio || 'Todos los maestros'}
+          </h2>
           {comuna && (
             <p style={s.ubicacion}>
               <FaMapMarkerAlt size={15} color="#1D9E75" /> &nbsp;{comuna}
@@ -86,7 +90,12 @@ function MaestrosPage() {
               <button
                 key={m.id}
                 onClick={() => navigate(`/maestros/${m.id}`)}
-                style={s.tarjeta}
+                style={{
+                  ...s.tarjeta,
+                  flexDirection: isMobile ? 'column' : 'row',
+                  alignItems: isMobile ? 'flex-start' : 'center',
+                  gap: isMobile ? 12 : 0,
+                }}
               >
                 <div style={s.tarjetaIzq}>
                   <div style={s.avatar}>{m.nombre?.[0]}</div>
@@ -96,7 +105,13 @@ function MaestrosPage() {
                     <p style={s.precio}>${m.precioPorHora?.toLocaleString('es-CL')} / hora</p>
                   </div>
                 </div>
-                <div style={s.tarjetaDer}>
+                <div style={{
+                  ...s.tarjetaDer,
+                  alignItems: isMobile ? 'flex-start' : 'flex-end',
+                  flexDirection: isMobile ? 'row' : 'column',
+                  flexWrap: 'wrap',
+                  width: isMobile ? '100%' : 'auto',
+                }}>
                   <span style={s.estrellas}>
                     <FaStar size={15} color="#EF9F27" />
                     &nbsp;{m.calificacion > 0 ? m.calificacion.toFixed(1) : '—'}
@@ -116,10 +131,10 @@ function MaestrosPage() {
 }
 
 const s = {
-  pagina: { maxWidth: 800, margin: '0 auto', padding: '36px 24px 80px', minHeight: 'calc(100vh - 140px)' },
+  pagina: { maxWidth: 800, margin: '0 auto', minHeight: 'calc(100vh - 140px)' },
   centrado: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', padding: 24 },
-  encabezado: { display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 },
-  titulo: { fontSize: 30, fontWeight: '800', color: '#0f2a22', margin: '0 0 4px' },
+  encabezado: { display: 'flex', alignItems: 'center', marginBottom: 20 },
+  titulo: { fontWeight: '800', color: '#0f2a22', margin: '0 0 4px' },
   ubicacion: { display: 'flex', alignItems: 'center', fontSize: 17, color: '#4b7062', margin: 0 },
   botonVolver: {
     background: 'none', border: '2px solid #1D9E75', borderRadius: 10,
@@ -129,14 +144,15 @@ const s = {
   conteo: { fontSize: 17, color: '#4b7062', marginBottom: 18 },
   lista: { display: 'flex', flexDirection: 'column', gap: 14 },
   tarjeta: {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    display: 'flex', justifyContent: 'space-between',
     padding: '18px 22px', backgroundColor: '#ffffff',
     border: '2px solid #b7e4ce', borderRadius: 16,
     cursor: 'pointer', textAlign: 'left', width: '100%',
     boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    boxSizing: 'border-box',
   },
   tarjetaIzq: { display: 'flex', alignItems: 'center', gap: 16 },
-  tarjetaDer: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 7 },
+  tarjetaDer: { display: 'flex', gap: 7 },
   avatar: {
     width: 56, height: 56, borderRadius: '50%', backgroundColor: '#1D9E75',
     color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
