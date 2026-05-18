@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaStar, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaStar, FaMapMarkerAlt, FaTag } from 'react-icons/fa';
 
 const CATEGORIAS = [
   { nombre: 'Electricista',  icono: '⚡', desc: 'Instalaciones eléctricas' },
@@ -82,7 +82,46 @@ function MaestrosScroll({ maestros }) {
   );
 }
 
-/* ---------- componente principal: dos columnas ---------- */
+const PRODUCTOS = [
+  { icono: '🔌', nombre: 'Cable eléctrico 2,5mm x 100m', marca: 'Policial', precio: 34990 },
+  { icono: '🪛', nombre: 'Set destornilladores 12 pzas', marca: 'Stanley', precio: 18490 },
+  { icono: '🎨', nombre: 'Pintura látex interior 4L', marca: 'Sipa', precio: 21990 },
+  { icono: '🔧', nombre: 'Llave inglesa ajustable 12"', marca: 'Bahco', precio: 15990 },
+];
+
+/* ---------- columna de productos auspiciados ---------- */
+function ProductosAuspiciados() {
+  return (
+    <div style={s.columnaProducts}>
+      <div style={s.colTitulo}>
+        <h2 style={s.tituloCol}>
+          <FaTag size={16} color="#c0392b" style={{ verticalAlign: 'middle', marginRight: 8 }} />
+          Productos destacados
+        </h2>
+        <p style={s.subtituloCol}>Herramientas para el trabajo</p>
+      </div>
+
+      <div style={s.productosLista}>
+        {PRODUCTOS.map((p) => (
+          <div key={p.nombre} style={s.productoCard}>
+            <span style={s.productoIcono}>{p.icono}</span>
+            <div style={s.productoInfo}>
+              <p style={s.productoNombre}>{p.nombre}</p>
+              <p style={s.productoMarca}>{p.marca}</p>
+              <p style={s.productoPrecio}>${p.precio.toLocaleString('es-CL')}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <a href="mailto:contacto@maestroschile.cl?subject=Quiero%20auspiciar" style={s.botonAuspiciar}>
+        Publicite aquí →
+      </a>
+    </div>
+  );
+}
+
+/* ---------- componente principal: tres columnas ---------- */
 function SeccionDual({ maestros }) {
   const navigate = useNavigate();
 
@@ -116,7 +155,7 @@ function SeccionDual({ maestros }) {
           </button>
         </div>
 
-        {/* Columna derecha — maestros destacados con scroll */}
+        {/* Columna central — maestros destacados con scroll */}
         <div style={s.columnaDer}>
           <div style={s.colTitulo}>
             <h2 style={s.tituloCol}>
@@ -128,6 +167,9 @@ function SeccionDual({ maestros }) {
 
           <MaestrosScroll maestros={maestros} />
         </div>
+
+        {/* Columna derecha — productos auspiciados */}
+        <ProductosAuspiciados />
 
       </div>
     </section>
@@ -142,8 +184,28 @@ const s = {
   },
 
   /* columnas */
-  columnaIzq: { flex: 1, minWidth: 0 },
-  columnaDer: { flex: 1, minWidth: 0 },
+  columnaIzq:      { flex: 1, minWidth: 0 },
+  columnaDer:      { flex: 1, minWidth: 0 },
+  columnaProducts: { flex: '0 0 220px', minWidth: 0 },
+
+  /* productos auspiciados */
+  productosLista: { display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 },
+  productoCard: {
+    display: 'flex', alignItems: 'center', gap: 10,
+    backgroundColor: '#fff5f5', border: '1.5px solid #f5c6c6',
+    borderRadius: 12, padding: '10px 12px',
+  },
+  productoIcono:  { fontSize: 28, flexShrink: 0 },
+  productoInfo:   { display: 'flex', flexDirection: 'column', gap: 2 },
+  productoNombre: { fontSize: 13, fontWeight: '700', color: '#0f2a22', margin: 0, lineHeight: 1.3 },
+  productoMarca:  { fontSize: 12, color: '#7a7a7a', margin: 0 },
+  productoPrecio: { fontSize: 14, fontWeight: '800', color: '#c0392b', margin: 0 },
+  botonAuspiciar: {
+    display: 'block', textAlign: 'center', textDecoration: 'none',
+    width: '100%', padding: '11px', backgroundColor: '#c0392b',
+    color: '#fff', borderRadius: 10, fontSize: 14, fontWeight: '700',
+    boxSizing: 'border-box',
+  },
   colTitulo:  { marginBottom: 20 },
   tituloCol:  { fontSize: 24, fontWeight: '800', color: '#0f2a22', margin: '0 0 6px' },
   subtituloCol: { fontSize: 16, color: '#4b7062', margin: 0 },
