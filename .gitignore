@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno — NUNCA subir al repositorio
+.env
+.env.local
+.env.*.local
+
+# Credenciales de Firebase (archivo JSON descargado)
+*.json
+!package.json
+!package-lock.json
+
+# Build de producción
+build/
+dist/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
