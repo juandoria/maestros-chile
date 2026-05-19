@@ -8,6 +8,7 @@ import MaestroPerfilPage from './pages/MaestroPerfilPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import MiPerfilMaestroPage from './pages/MiPerfilMaestroPage';
+import PanelMaestroPage from './pages/PanelMaestroPage';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/registro" element={<RegisterPage />} />
           <Route path="/registro-maestro" element={<RegisterPage />} />
           <Route path="/mi-perfil-maestro" element={<MiPerfilMaestroPage />} />
+          <Route path="/panel" element={<PanelMaestroPage />} />
         </Routes>
         <Footer />
       </BrowserRouter>

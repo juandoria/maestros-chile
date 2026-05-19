@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaStar, FaMapMarkerAlt, FaWhatsapp } from 'react-icons/fa';
+import { FaStar, FaMapMarkerAlt } from 'react-icons/fa';
 import { getMaestroById, getReseñas } from '../services/api';
 import { useResponsive } from '../hooks/useResponsive';
 import FormularioReseña from '../components/FormularioReseña';
+import ContactoMaestro from '../components/ContactoMaestro';
 
 const ICONOS = {
   'Electricista': '⚡', 'Gasfíter': '🔧', 'Carpintero': '🪚',
@@ -113,10 +114,6 @@ function MaestroPerfilPage() {
   const oficios = maestro.oficios?.length ? maestro.oficios : (maestro.oficio ? [maestro.oficio] : []);
   const oficioLabel = oficios.join(' · ') || '—';
 
-  const mensajeWsp = encodeURIComponent(
-    `Hola ${maestro.nombre}, lo encontré en Maestros Chile y necesito ayuda. ¿Podría ayudarme?`
-  );
-
   return (
     <div style={{ ...s.pagina, padding: isMobile ? '24px 16px 60px' : '32px 24px 80px' }}>
       <button onClick={() => navigate(-1)} style={s.botonVolver}>
@@ -211,20 +208,15 @@ function MaestroPerfilPage() {
         </div>
       )}
 
-      {/* Botón WhatsApp */}
-      <a
-        href={`https://wa.me/56?text=${mensajeWsp}`}
-        target="_blank"
-        rel="noreferrer"
-        style={{ ...s.botonWsp, fontSize: isMobile ? 18 : 21, padding: isMobile ? '16px 20px' : '20px 32px' }}
-      >
-        <FaWhatsapp size={isMobile ? 22 : 26} />
-        &nbsp; Contactar por WhatsApp
-      </a>
-
-      <p style={s.ayuda}>
-        Al hacer clic se abrirá WhatsApp para escribirle directamente al maestro.
-      </p>
+      {/* Contacto: Chat / Cotización / Consulta */}
+      <div style={s.seccionContacto}>
+        <p style={s.seccionLabel}>📞 Contactar al maestro</p>
+        <ContactoMaestro
+          maestroId={id}
+          maestroNombre={maestro.nombre}
+          oficios={oficios}
+        />
+      </div>
 
       {/* Reseñas existentes */}
       {reseñas.length > 0 && (
@@ -338,14 +330,7 @@ const s = {
     borderRadius: 20, padding: '6px 14px',
     fontSize: 15, fontWeight: '700',
   },
-  botonWsp: {
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    textDecoration: 'none', backgroundColor: '#1D9E75', color: '#ffffff',
-    borderRadius: 14, fontWeight: '800',
-    boxShadow: '0 4px 16px rgba(29,158,117,0.35)',
-    marginBottom: 14,
-  },
-  ayuda: { textAlign: 'center', fontSize: 16, color: '#4b7062', lineHeight: 1.5 },
+  seccionContacto: { marginBottom: 16 },
   reseñaCard: {
     backgroundColor: '#fafafa', border: '1.5px solid #e5e7eb',
     borderRadius: 12, padding: '14px 18px',
