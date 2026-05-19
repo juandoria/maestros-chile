@@ -112,7 +112,6 @@ function MaestroPerfilPage() {
 
   // Normaliza oficios: soporta array nuevo o string legado
   const oficios = maestro.oficios?.length ? maestro.oficios : (maestro.oficio ? [maestro.oficio] : []);
-  const oficioLabel = oficios.join(' · ') || '—';
 
   return (
     <div style={{ ...s.pagina, padding: isMobile ? '24px 16px 60px' : '32px 24px 80px' }}>
