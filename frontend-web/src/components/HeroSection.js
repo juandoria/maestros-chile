@@ -95,31 +95,31 @@ function HeroSection() {
 }
 
 const s = {
-  hero: { backgroundColor: '#E1F5EE', borderBottom: '3px solid #b7e4ce' },
+  hero: { background: 'linear-gradient(135deg, #1D9E75 0%, #085041 100%)', borderBottom: 'none' },
   inner: { maxWidth: 760, margin: '0 auto', textAlign: 'center' },
-  titulo: { fontWeight: '900', color: '#0f2a22', margin: '0 0 14px', lineHeight: 1.15 },
-  subtitulo: { color: '#4b7062', margin: 0 },
+  titulo: { fontWeight: '900', color: '#ffffff', margin: '0 0 14px', lineHeight: 1.15 },
+  subtitulo: { color: 'rgba(255,255,255,0.85)', margin: 0 },
   buscadorFila: {
     display: 'flex', gap: 0, borderRadius: 12,
-    boxShadow: '0 4px 20px rgba(29,158,117,0.25)',
-    overflow: 'hidden', border: '2px solid #1D9E75',
+    boxShadow: '0 6px 28px rgba(0,0,0,0.25)',
+    overflow: 'hidden', border: '2px solid rgba(255,255,255,0.3)',
     backgroundColor: '#ffffff',
   },
   inputWrapper: { flex: 1, position: 'relative', display: 'flex', alignItems: 'center' },
   inputIcono: { position: 'absolute', left: 14, pointerEvents: 'none' },
   input: { width: '100%', border: 'none', outline: 'none', backgroundColor: 'transparent', color: '#0f2a22', fontFamily: 'inherit' },
   botonBuscar: {
-    backgroundColor: '#1D9E75', color: '#ffffff',
+    backgroundColor: '#F97316', color: '#ffffff',
     border: 'none', cursor: 'pointer', fontWeight: '800', whiteSpace: 'nowrap', flexShrink: 0,
   },
   ubicacionFila: { marginTop: 18 },
   botonUbicacion: {
     display: 'inline-flex', alignItems: 'center', gap: 6,
-    background: 'none', border: 'none', color: '#1D9E75',
+    background: 'none', border: 'none', color: 'rgba(255,255,255,0.9)',
     fontSize: 17, fontWeight: '700', cursor: 'pointer',
     padding: '6px 12px', borderRadius: 8, textDecoration: 'underline',
   },
-  ubicacionTexto: { fontSize: 17, color: '#1D9E75', fontWeight: '700' },
+  ubicacionTexto: { fontSize: 17, color: '#ffffff', fontWeight: '700' },
 };
 
 export default HeroSection;

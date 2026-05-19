@@ -43,7 +43,7 @@ function Navbar() {
                 Ingresar
               </Link>
               <Link to="/registro"
-                style={{ ...btnBase, backgroundColor: '#fff', border: '2px solid #fff', color: '#1D9E75' }}>
+                style={{ ...btnBase, backgroundColor: '#F97316', border: '2px solid #F97316', color: '#fff' }}>
                 Soy maestro
               </Link>
             </>

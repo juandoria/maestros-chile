@@ -45,9 +45,10 @@ const s = {
   },
   circulo: {
     width: 52, height: 52, borderRadius: '50%',
-    backgroundColor: '#1D9E75',
+    backgroundColor: '#F97316',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     marginBottom: 14,
+    boxShadow: '0 4px 12px rgba(249,115,22,0.35)',
   },
   numero: { color: '#ffffff', fontSize: 24, fontWeight: '900' },
   icono: { fontSize: 40, marginBottom: 14 },
