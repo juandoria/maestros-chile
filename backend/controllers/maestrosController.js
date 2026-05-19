@@ -6,16 +6,35 @@ const COLLECTION = 'maestros';
 async function getMaestros(req, res) {
   try {
     const { oficio, comuna } = req.query;
-    let query = db.collection(COLLECTION);
+    const col = db.collection(COLLECTION);
 
-    // Soporta tanto 'oficios' (array nuevo) como 'oficio' (campo legado)
-    if (oficio) query = query.where('oficios', 'array-contains', oficio);
+    let snapshots;
+
+    if (oficio) {
+      // Consulta 1: campo 'oficios' como array (perfiles nuevos)
+      let q1 = col.where('oficios', 'array-contains', oficio);
+      if (comuna) q1 = q1.where('comuna', '==', comuna);
+
+      // Consulta 2: campo 'oficio' como string (perfiles legados)
+      let q2 = col.where('oficio', '==', oficio);
+      if (comuna) q2 = q2.where('comuna', '==', comuna);
+
+      const [snap1, snap2] = await Promise.all([q1.get(), q2.get()]);
+
+      // Combina y deduplica por ID
+      const mapaIds = new Map();
+      [...snap1.docs, ...snap2.docs].forEach((doc) => {
+        if (!mapaIds.has(doc.id)) mapaIds.set(doc.id, { id: doc.id, ...doc.data() });
+      });
+      return res.json([...mapaIds.values()]);
+    }
+
+    // Sin filtro de oficio: devuelve todos (con o sin filtro de comuna)
+    let query = col;
     if (comuna) query = query.where('comuna', '==', comuna);
+    snapshots = await query.get();
+    res.json(snapshots.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
 
-    const snapshot = await query.get();
-    const maestros = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-    res.json(maestros);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener maestros' });
   }
