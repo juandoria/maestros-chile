@@ -11,6 +11,12 @@ const ICONOS = {
   'Técnico en calefacción': '🔥', 'Jardinero': '🌿',
 };
 
+const DIAS_ORDEN = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+const DIAS_LABELS = {
+  lunes: 'Lun', martes: 'Mar', miercoles: 'Mié',
+  jueves: 'Jue', viernes: 'Vie', sabado: 'Sáb', domingo: 'Dom',
+};
+
 function Estrellas({ valor }) {
   return (
     <span style={{ display: 'inline-flex', gap: 3, alignItems: 'center' }}>
@@ -31,6 +37,42 @@ const LABELS_CATEGORIAS = {
   limpieza:    '🧹 Limpieza',
   precioJusto: '💰 Precio',
 };
+
+function HorarioPublico({ horario }) {
+  if (!horario) return null;
+  const diasActivos = DIAS_ORDEN.filter((d) => horario[d]?.activo);
+  if (diasActivos.length === 0) return <p style={{ color: '#9ca3af', fontSize: 15 }}>Sin horario definido</p>;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {DIAS_ORDEN.map((key) => {
+        const dia = horario[key];
+        return (
+          <div key={key} style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '8px 12px', borderRadius: 10,
+            backgroundColor: dia?.activo ? '#f0fdf8' : '#f9fafb',
+            border: `1.5px solid ${dia?.activo ? '#b7e4ce' : '#e5e7eb'}`,
+          }}>
+            <span style={{
+              width: 36, fontSize: 14, fontWeight: '700',
+              color: dia?.activo ? '#085041' : '#9ca3af',
+            }}>
+              {DIAS_LABELS[key]}
+            </span>
+            {dia?.activo ? (
+              <span style={{ fontSize: 15, color: '#0f2a22', fontWeight: '600' }}>
+                {dia.desde} → {dia.hasta}
+              </span>
+            ) : (
+              <span style={{ fontSize: 14, color: '#9ca3af' }}>No disponible</span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function MaestroPerfilPage() {
   const { id } = useParams();
@@ -67,8 +109,12 @@ function MaestroPerfilPage() {
     );
   }
 
+  // Normaliza oficios: soporta array nuevo o string legado
+  const oficios = maestro.oficios?.length ? maestro.oficios : (maestro.oficio ? [maestro.oficio] : []);
+  const oficioLabel = oficios.join(' · ') || '—';
+
   const mensajeWsp = encodeURIComponent(
-    `Hola ${maestro.nombre}, lo encontré en Maestros Chile y necesito un ${maestro.oficio}. ¿Podría ayudarme?`
+    `Hola ${maestro.nombre}, lo encontré en Maestros Chile y necesito ayuda. ¿Podría ayudarme?`
   );
 
   return (
@@ -85,20 +131,36 @@ function MaestroPerfilPage() {
           alignItems: isMobile ? 'center' : 'flex-start',
           textAlign: isMobile ? 'center' : 'left',
         }}>
-          <div style={{
-            ...s.avatar,
-            width: isMobile ? 64 : 80,
-            height: isMobile ? 64 : 80,
-            fontSize: isMobile ? 28 : 36,
-          }}>
-            {maestro.nombre?.[0]}
-          </div>
+          {/* Avatar: foto real o inicial */}
+          {maestro.fotoUrl ? (
+            <img src={maestro.fotoUrl} alt={maestro.nombre} style={{
+              ...s.fotoAvatar,
+              width: isMobile ? 80 : 100,
+              height: isMobile ? 80 : 100,
+            }} />
+          ) : (
+            <div style={{
+              ...s.avatar,
+              width: isMobile ? 64 : 80,
+              height: isMobile ? 64 : 80,
+              fontSize: isMobile ? 28 : 36,
+            }}>
+              {maestro.nombre?.[0]}
+            </div>
+          )}
+
           <div style={{ flex: 1 }}>
             <h1 style={{ ...s.nombre, fontSize: isMobile ? 22 : 26 }}>{maestro.nombre}</h1>
-            <p style={s.oficio}>
-              <span>{ICONOS[maestro.oficio] || '🔧'}</span>
-              &nbsp;{maestro.oficio}
-            </p>
+
+            {/* Oficios (puede ser múltiple) */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, justifyContent: isMobile ? 'center' : 'flex-start' }}>
+              {oficios.map((o) => (
+                <span key={o} style={s.oficioChip}>
+                  {ICONOS[o] || '🔧'} {o}
+                </span>
+              ))}
+            </div>
+
             <p style={{ ...s.ubicacion, justifyContent: isMobile ? 'center' : 'flex-start' }}>
               <FaMapMarkerAlt size={15} color="#1D9E75" /> &nbsp;{maestro.comuna}
             </p>
@@ -138,6 +200,14 @@ function MaestroPerfilPage() {
               <span key={e} style={s.chip}>{e}</span>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Horario semanal */}
+      {maestro.horario && (
+        <div style={s.seccion}>
+          <p style={s.seccionLabel}>📅 Disponibilidad semanal</p>
+          <HorarioPublico horario={maestro.horario} />
         </div>
       )}
 
@@ -228,14 +298,23 @@ const s = {
     boxShadow: '0 2px 10px rgba(0,0,0,0.07)',
   },
   encabezado: { display: 'flex', gap: 20, marginBottom: 18 },
+  fotoAvatar: {
+    borderRadius: '50%', objectFit: 'cover',
+    border: '3px solid #b7e4ce', flexShrink: 0,
+  },
   avatar: {
     borderRadius: '50%', backgroundColor: '#1D9E75', color: '#fff',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontWeight: '800', flexShrink: 0,
   },
-  nombre: { fontWeight: '800', color: '#0f2a22', margin: '0 0 6px' },
-  oficio: { fontSize: 19, color: '#0f2a22', margin: '0 0 4px', fontWeight: '600' },
-  ubicacion: { display: 'flex', alignItems: 'center', fontSize: 16, color: '#4b7062', margin: 0 },
+  nombre: { fontWeight: '800', color: '#0f2a22', margin: '0 0 8px' },
+  oficioChip: {
+    display: 'inline-flex', alignItems: 'center', gap: 4,
+    backgroundColor: '#E1F5EE', color: '#085041',
+    borderRadius: 20, padding: '4px 12px',
+    fontSize: 15, fontWeight: '700',
+  },
+  ubicacion: { display: 'flex', alignItems: 'center', fontSize: 16, color: '#4b7062', margin: '6px 0 0' },
   badgeDisponible: {
     display: 'inline-block', backgroundColor: '#E1F5EE', color: '#085041',
     border: '2px solid #1D9E75', borderRadius: 10, padding: '10px 18px',
@@ -250,7 +329,7 @@ const s = {
     backgroundColor: '#ffffff', border: '2px solid #b7e4ce',
     borderRadius: 16, padding: '18px 24px', marginBottom: 16,
   },
-  seccionLabel: { fontSize: 17, color: '#4b7062', margin: '0 0 8px', fontWeight: '700' },
+  seccionLabel: { fontSize: 17, color: '#4b7062', margin: '0 0 12px', fontWeight: '700' },
   precioValor: { fontWeight: '900', color: '#1D9E75', margin: 0 },
   descripcion: { fontSize: 18, color: '#0f2a22', lineHeight: 1.7, margin: 0 },
   chips: { display: 'flex', flexWrap: 'wrap', gap: 8 },
