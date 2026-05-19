@@ -309,6 +309,21 @@ function MiPerfilMaestroPage() {
             placeholder="Ej: Peñalolén" style={inputBase} />
         </div>
 
+        {/* Descripción */}
+        <div style={s.campo}>
+          <label style={s.label}>Descripción de tu servicio</label>
+          <textarea name="descripcion" value={form.descripcion} onChange={handleChange}
+            placeholder="Cuéntales a los clientes sobre tu experiencia y forma de trabajo..."
+            rows={4} style={{ ...inputBase, resize: 'vertical', minHeight: 100 }} />
+        </div>
+
+        {/* Horario semanal */}
+        <div style={s.campo}>
+          <label style={s.label}>Disponibilidad semanal</label>
+          <p style={s.labelHint2}>Indica los días y horarios en que puedes recibir trabajos</p>
+          <HorarioSemanal horario={horario} onChange={setHorario} />
+        </div>
+
         {/* Precio */}
         <div style={s.campo}>
           <label style={s.label}>Precio por hora (CLP) *</label>
@@ -374,21 +389,6 @@ function MiPerfilMaestroPage() {
               )}
             </div>
           )}
-        </div>
-
-        {/* Descripción */}
-        <div style={s.campo}>
-          <label style={s.label}>Descripción de tu servicio</label>
-          <textarea name="descripcion" value={form.descripcion} onChange={handleChange}
-            placeholder="Cuéntales a los clientes sobre tu experiencia y forma de trabajo..."
-            rows={4} style={{ ...inputBase, resize: 'vertical', minHeight: 100 }} />
-        </div>
-
-        {/* Horario semanal */}
-        <div style={s.campo}>
-          <label style={s.label}>Disponibilidad semanal</label>
-          <p style={s.labelHint2}>Indica los días y horarios en que puedes recibir trabajos</p>
-          <HorarioSemanal horario={horario} onChange={setHorario} />
         </div>
 
         {/* Disponible ahora */}
