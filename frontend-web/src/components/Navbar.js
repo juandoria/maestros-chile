@@ -33,6 +33,10 @@ function Navbar() {
         <nav style={s.nav}>
           {usuario ? (
             <>
+              <Link to="/panel"
+                style={{ ...btnBase, backgroundColor: 'transparent', border: '2px solid #fff', color: '#fff' }}>
+                Panel
+              </Link>
               <Link to="/mi-perfil-maestro"
                 style={{ ...btnBase, backgroundColor: 'transparent', border: '2px solid #fff', color: '#fff' }}>
                 Mi perfil
