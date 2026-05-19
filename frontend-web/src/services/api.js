@@ -38,3 +38,6 @@ export const getReseñas = (maestroId) =>
 
 export const createReseña = (maestroId, datos) =>
   api.post(`/maestros/${maestroId}/reseñas`, datos);
+
+export const getMiPerfilMaestro = () =>
+  api.get('/maestros/mi-perfil');

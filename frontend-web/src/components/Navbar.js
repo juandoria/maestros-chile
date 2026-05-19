@@ -32,10 +32,16 @@ function Navbar() {
 
         <nav style={s.nav}>
           {usuario ? (
-            <button onClick={handleCerrarSesion}
-              style={{ ...btnBase, backgroundColor: 'transparent', border: '2px solid #fff', color: '#fff' }}>
-              Salir
-            </button>
+            <>
+              <Link to="/mi-perfil-maestro"
+                style={{ ...btnBase, backgroundColor: 'transparent', border: '2px solid #fff', color: '#fff' }}>
+                Mi perfil
+              </Link>
+              <button onClick={handleCerrarSesion}
+                style={{ ...btnBase, backgroundColor: 'transparent', border: '2px solid #fff', color: '#fff' }}>
+                Salir
+              </button>
+            </>
           ) : (
             <>
               <Link to="/login"
