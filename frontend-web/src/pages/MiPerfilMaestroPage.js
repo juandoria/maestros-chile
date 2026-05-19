@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { inputBase } from '../styles/theme';
 import HorarioSemanal, { HORARIO_DEFAULT } from '../components/HorarioSemanal';
 
-const OFICIOS = [
+const OFICIOS_SUGERIDOS = [
   'Electricista', 'Gasfíter', 'Carpintero', 'Pintor',
   'Albañil', 'Cerrajero', 'Técnico en calefacción', 'Jardinero',
 ];
@@ -33,8 +33,16 @@ function MiPerfilMaestroPage() {
     nombre: '', comuna: '', descripcion: '', precioPorHora: '', disponible: true,
   });
   const [oficios, setOficios]           = useState([]);
+  const [nuevoOficio, setNuevoOficio]   = useState('');
   const [especialidades, setEspecialidades] = useState([]);
+  const [nuevaEsp, setNuevaEsp]         = useState('');
   const [horario, setHorario]           = useState(HORARIO_DEFAULT);
+
+  // Cobro fuera de horario
+  const [fueraHorario, setFueraHorario]       = useState(false);
+  const [fueraHorarioValor, setFueraHorarioValor] = useState('');
+  const [fueraHorarioTipo, setFueraHorarioTipo]   = useState('fijo'); // 'fijo' | 'porcentaje'
+
   const [fotoUrl, setFotoUrl]           = useState('');
   const [fotoPreview, setFotoPreview]   = useState('');
   const [fotoFile, setFotoFile]         = useState(null);
@@ -60,6 +68,11 @@ function MiPerfilMaestroPage() {
         setEspecialidades(d.especialidades || []);
         setHorario(d.horario || HORARIO_DEFAULT);
         setFotoUrl(d.fotoUrl || '');
+        if (d.fueraHorario) {
+          setFueraHorario(true);
+          setFueraHorarioValor(d.fueraHorario.valor || '');
+          setFueraHorarioTipo(d.fueraHorario.tipo || 'fijo');
+        }
       })
       .catch(() => {})
       .finally(() => setCargando(false));
@@ -76,10 +89,24 @@ function MiPerfilMaestroPage() {
     );
   };
 
+  const agregarOficioPersonalizado = () => {
+    const texto = nuevoOficio.trim();
+    if (!texto || oficios.includes(texto)) return;
+    setOficios((prev) => [...prev, texto]);
+    setNuevoOficio('');
+  };
+
   const toggleEspecialidad = (esp) => {
     setEspecialidades((prev) =>
       prev.includes(esp) ? prev.filter((e) => e !== esp) : [...prev, esp]
     );
+  };
+
+  const agregarEspPersonalizada = () => {
+    const texto = nuevaEsp.trim();
+    if (!texto || especialidades.includes(texto)) return;
+    setEspecialidades((prev) => [...prev, texto]);
+    setNuevaEsp('');
   };
 
   const handleFotoChange = (e) => {
@@ -101,7 +128,7 @@ function MiPerfilMaestroPage() {
     e.preventDefault();
     setError(''); setExito('');
     if (oficios.length === 0 || !form.comuna || !form.precioPorHora) {
-      setError('Selecciona al menos un oficio, tu comuna y precio por hora.');
+      setError('Agrega al menos un oficio, tu comuna y precio por hora.');
       return;
     }
     setGuardando(true);
@@ -114,6 +141,9 @@ function MiPerfilMaestroPage() {
         especialidades,
         horario,
         fotoUrl: urlFoto,
+        fueraHorario: fueraHorario
+          ? { activo: true, valor: Number(fueraHorarioValor) || 0, tipo: fueraHorarioTipo }
+          : null,
       };
       if (perfilId) {
         await updateMaestro(perfilId, datos);
@@ -134,7 +164,10 @@ function MiPerfilMaestroPage() {
 
   if (cargando) return <div style={s.centrado}><p style={s.cargando}>Cargando tu perfil...</p></div>;
 
+  // Especialidades sugeridas para los oficios seleccionados
   const sugerencias = [...new Set(oficios.flatMap((o) => ESPECIALIDADES_SUGERIDAS[o] || []))];
+  // Especialidades personalizadas (las que el maestro agregó manualmente y no son sugeridas)
+  const espPersonalizadas = especialidades.filter((e) => !sugerencias.includes(e));
   const fotoMostrar = fotoPreview || fotoUrl;
 
   return (
@@ -148,7 +181,7 @@ function MiPerfilMaestroPage() {
 
       <form onSubmit={handleGuardar} style={s.form}>
 
-        {/* Foto de perfil */}
+        {/* Foto */}
         <div style={s.campo}>
           <label style={s.label}>Foto de perfil</label>
           <div style={s.fotoArea}>
@@ -169,16 +202,8 @@ function MiPerfilMaestroPage() {
                   Quitar foto
                 </button>
               )}
-              <input
-                ref={inputFoto}
-                type="file"
-                accept="image/*"
-                onChange={handleFotoChange}
-                style={{ display: 'none' }}
-              />
-              <p style={{ fontSize: 13, color: '#9ca3af', margin: 0 }}>
-                JPG o PNG, máximo 5 MB
-              </p>
+              <input ref={inputFoto} type="file" accept="image/*" onChange={handleFotoChange} style={{ display: 'none' }} />
+              <p style={{ fontSize: 13, color: '#9ca3af', margin: 0 }}>JPG o PNG, máximo 5 MB</p>
             </div>
           </div>
         </div>
@@ -190,49 +215,92 @@ function MiPerfilMaestroPage() {
             placeholder="Ej: Carlos Muñoz" style={inputBase} />
         </div>
 
-        {/* Oficios — múltiple selección */}
+        {/* Oficios */}
         <div style={s.campo}>
-          <label style={s.label}>¿En qué oficios trabajas? * <span style={s.labelHint}>(puedes elegir varios)</span></label>
+          <label style={s.label}>
+            ¿En qué oficios trabajas? * <span style={s.labelHint}>(elige uno o varios)</span>
+          </label>
           <div style={s.chips}>
-            {OFICIOS.map((o) => (
-              <button
-                key={o} type="button"
-                onClick={() => toggleOficio(o)}
-                style={{
-                  ...s.chip,
-                  backgroundColor: oficios.includes(o) ? '#1D9E75' : '#f0fdf8',
-                  color:           oficios.includes(o) ? '#fff'     : '#085041',
-                  border:          oficios.includes(o) ? '2px solid #1D9E75' : '2px solid #b7e4ce',
-                }}
-              >
+            {OFICIOS_SUGERIDOS.map((o) => (
+              <button key={o} type="button" onClick={() => toggleOficio(o)} style={{
+                ...s.chip,
+                backgroundColor: oficios.includes(o) ? '#1D9E75' : '#f0fdf8',
+                color:           oficios.includes(o) ? '#fff'     : '#085041',
+                border:          oficios.includes(o) ? '2px solid #1D9E75' : '2px solid #b7e4ce',
+              }}>
                 {oficios.includes(o) ? '✓ ' : ''}{o}
               </button>
             ))}
+            {/* Oficios personalizados ya agregados */}
+            {oficios.filter((o) => !OFICIOS_SUGERIDOS.includes(o)).map((o) => (
+              <button key={o} type="button" onClick={() => toggleOficio(o)} style={{
+                ...s.chip,
+                backgroundColor: '#1D9E75', color: '#fff', border: '2px solid #1D9E75',
+              }}>
+                ✓ {o}
+              </button>
+            ))}
+          </div>
+
+          {/* Agregar oficio personalizado */}
+          <div style={s.inputAgregar}>
+            <input
+              value={nuevoOficio}
+              onChange={(e) => setNuevoOficio(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), agregarOficioPersonalizado())}
+              placeholder="¿Tu oficio no está? Escríbelo aquí..."
+              style={{ ...inputBase, flex: 1, marginBottom: 0 }}
+            />
+            <button type="button" onClick={agregarOficioPersonalizado} style={s.botonAgregar}>
+              + Agregar
+            </button>
           </div>
         </div>
 
-        {/* Especialidades (basadas en oficios seleccionados) */}
-        {sugerencias.length > 0 && (
-          <div style={s.campo}>
-            <label style={s.label}>Especialidades</label>
-            <div style={s.chips}>
+        {/* Especialidades */}
+        <div style={s.campo}>
+          <label style={s.label}>Especialidades</label>
+          {sugerencias.length > 0 && (
+            <div style={{ ...s.chips, marginBottom: 10 }}>
               {sugerencias.map((esp) => (
-                <button
-                  key={esp} type="button"
-                  onClick={() => toggleEspecialidad(esp)}
-                  style={{
-                    ...s.chip,
-                    backgroundColor: especialidades.includes(esp) ? '#F97316' : '#f0fdf8',
-                    color:           especialidades.includes(esp) ? '#fff'     : '#085041',
-                    border:          especialidades.includes(esp) ? '2px solid #F97316' : '2px solid #b7e4ce',
-                  }}
-                >
+                <button key={esp} type="button" onClick={() => toggleEspecialidad(esp)} style={{
+                  ...s.chip,
+                  backgroundColor: especialidades.includes(esp) ? '#F97316' : '#f0fdf8',
+                  color:           especialidades.includes(esp) ? '#fff'     : '#085041',
+                  border:          especialidades.includes(esp) ? '2px solid #F97316' : '2px solid #b7e4ce',
+                }}>
                   {especialidades.includes(esp) ? '✓ ' : ''}{esp}
                 </button>
               ))}
             </div>
+          )}
+          {/* Especialidades personalizadas ya agregadas */}
+          {espPersonalizadas.length > 0 && (
+            <div style={{ ...s.chips, marginBottom: 10 }}>
+              {espPersonalizadas.map((esp) => (
+                <button key={esp} type="button" onClick={() => toggleEspecialidad(esp)} style={{
+                  ...s.chip,
+                  backgroundColor: '#F97316', color: '#fff', border: '2px solid #F97316',
+                }}>
+                  ✓ {esp}
+                </button>
+              ))}
+            </div>
+          )}
+          {/* Agregar especialidad personalizada */}
+          <div style={s.inputAgregar}>
+            <input
+              value={nuevaEsp}
+              onChange={(e) => setNuevaEsp(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), agregarEspPersonalizada())}
+              placeholder="Agrega una especialidad personalizada..."
+              style={{ ...inputBase, flex: 1, marginBottom: 0 }}
+            />
+            <button type="button" onClick={agregarEspPersonalizada} style={s.botonAgregar}>
+              + Agregar
+            </button>
           </div>
-        )}
+        </div>
 
         {/* Comuna */}
         <div style={s.campo}>
@@ -246,6 +314,66 @@ function MiPerfilMaestroPage() {
           <label style={s.label}>Precio por hora (CLP) *</label>
           <input name="precioPorHora" type="number" value={form.precioPorHora}
             onChange={handleChange} placeholder="Ej: 15000" style={inputBase} />
+        </div>
+
+        {/* Cobro fuera de horario */}
+        <div style={s.seccionExtra}>
+          <div style={s.fueraHorarioEncabezado}>
+            <div>
+              <p style={s.label}>🌙 Trabajos fuera de horario</p>
+              <p style={s.labelHint2}>¿Cobras un valor adicional por urgencias o trabajos nocturnos?</p>
+            </div>
+            <div
+              onClick={() => setFueraHorario(!fueraHorario)}
+              style={{ ...s.toggle, backgroundColor: fueraHorario ? '#F97316' : '#d1d5db' }}
+            >
+              <div style={{ ...s.toggleCirculo, transform: fueraHorario ? 'translateX(24px)' : 'translateX(2px)' }} />
+            </div>
+          </div>
+
+          {fueraHorario && (
+            <div style={s.fueraHorarioDetalle}>
+              <p style={{ fontSize: 15, color: '#4b7062', margin: '0 0 12px' }}>
+                Valor adicional que cobrarás fuera de tu horario habitual:
+              </p>
+              {/* Tipo: fijo o porcentaje */}
+              <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+                {['fijo', 'porcentaje'].map((tipo) => (
+                  <button
+                    key={tipo} type="button"
+                    onClick={() => setFueraHorarioTipo(tipo)}
+                    style={{
+                      ...s.chipTipo,
+                      backgroundColor: fueraHorarioTipo === tipo ? '#F97316' : '#fff',
+                      color:           fueraHorarioTipo === tipo ? '#fff'     : '#4b7062',
+                      border:          fueraHorarioTipo === tipo ? '2px solid #F97316' : '2px solid #e5e7eb',
+                    }}
+                  >
+                    {tipo === 'fijo' ? '$ Monto fijo (CLP)' : '% Porcentaje adicional'}
+                  </button>
+                ))}
+              </div>
+              <div style={s.inputAgregar}>
+                <input
+                  type="number"
+                  value={fueraHorarioValor}
+                  onChange={(e) => setFueraHorarioValor(e.target.value)}
+                  placeholder={fueraHorarioTipo === 'fijo' ? 'Ej: 5000' : 'Ej: 30'}
+                  style={{ ...inputBase, flex: 1, marginBottom: 0 }}
+                />
+                <span style={s.sufijo}>
+                  {fueraHorarioTipo === 'fijo' ? 'CLP' : '%'}
+                </span>
+              </div>
+              {fueraHorarioValor > 0 && (
+                <p style={s.fueraHorarioPreview}>
+                  {fueraHorarioTipo === 'fijo'
+                    ? `El cliente verá: precio normal + $${Number(fueraHorarioValor).toLocaleString('es-CL')} CLP por hora fuera de horario`
+                    : `El cliente verá: precio normal + ${fueraHorarioValor}% adicional fuera de horario`}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Descripción */}
@@ -270,10 +398,7 @@ function MiPerfilMaestroPage() {
             onClick={() => setForm({ ...form, disponible: !form.disponible })}
             style={{ ...s.toggle, backgroundColor: form.disponible ? '#1D9E75' : '#d1d5db' }}
           >
-            <div style={{
-              ...s.toggleCirculo,
-              transform: form.disponible ? 'translateX(24px)' : 'translateX(2px)',
-            }} />
+            <div style={{ ...s.toggleCirculo, transform: form.disponible ? 'translateX(24px)' : 'translateX(2px)' }} />
           </div>
           <span style={{ fontSize: 16, color: form.disponible ? '#085041' : '#9ca3af', fontWeight: '700' }}>
             {form.disponible ? 'Sí, estoy disponible' : 'No disponible ahora'}
@@ -305,40 +430,37 @@ const s = {
   subtitulo:  { fontSize: 17, color: '#4b7062', marginBottom: 32 },
   form:       { display: 'flex', flexDirection: 'column', gap: 24 },
   campo:      { display: 'flex', flexDirection: 'column', gap: 8 },
-  label:      { fontSize: 17, fontWeight: '700', color: '#0f2a22' },
+  label:      { fontSize: 17, fontWeight: '700', color: '#0f2a22', margin: 0 },
   labelHint:  { fontSize: 14, fontWeight: '500', color: '#6b7280' },
-  labelHint2: { fontSize: 14, color: '#6b7280', margin: '0 0 4px' },
+  labelHint2: { fontSize: 14, color: '#6b7280', margin: '2px 0 0' },
 
-  fotoArea:      { display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' },
-  fotoImg:       { width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', border: '3px solid #b7e4ce' },
-  fotoPlaceholder: {
-    width: 100, height: 100, borderRadius: '50%',
-    border: '3px dashed #b7e4ce', backgroundColor: '#f0fdf8',
-    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-  },
-  fotoBotones:   { display: 'flex', flexDirection: 'column', gap: 8 },
-  botonFoto:     {
-    padding: '8px 18px', fontSize: 14, fontWeight: '700',
-    backgroundColor: '#f0fdf8', color: '#085041',
-    border: '2px solid #1D9E75', borderRadius: 8, cursor: 'pointer',
-  },
-  botonFotoEliminar: {
-    padding: '8px 18px', fontSize: 14, fontWeight: '700',
-    backgroundColor: '#fff', color: '#dc2626',
-    border: '2px solid #fca5a5', borderRadius: 8, cursor: 'pointer',
-  },
+  fotoArea:         { display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' },
+  fotoImg:          { width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', border: '3px solid #b7e4ce' },
+  fotoPlaceholder:  { width: 100, height: 100, borderRadius: '50%', border: '3px dashed #b7e4ce', backgroundColor: '#f0fdf8', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' },
+  fotoBotones:      { display: 'flex', flexDirection: 'column', gap: 8 },
+  botonFoto:        { padding: '8px 18px', fontSize: 14, fontWeight: '700', backgroundColor: '#f0fdf8', color: '#085041', border: '2px solid #1D9E75', borderRadius: 8, cursor: 'pointer' },
+  botonFotoEliminar:{ padding: '8px 18px', fontSize: 14, fontWeight: '700', backgroundColor: '#fff', color: '#dc2626', border: '2px solid #fca5a5', borderRadius: 8, cursor: 'pointer' },
 
-  chips: { display: 'flex', flexWrap: 'wrap', gap: 10 },
-  chip:  { padding: '8px 16px', borderRadius: 20, fontSize: 15, fontWeight: '600', cursor: 'pointer' },
+  chips:       { display: 'flex', flexWrap: 'wrap', gap: 10 },
+  chip:        { padding: '8px 16px', borderRadius: 20, fontSize: 15, fontWeight: '600', cursor: 'pointer' },
+  inputAgregar:{ display: 'flex', gap: 8, alignItems: 'center' },
+  botonAgregar:{ padding: '10px 16px', fontSize: 15, fontWeight: '700', backgroundColor: '#f0fdf8', color: '#085041', border: '2px solid #1D9E75', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap' },
+
+  seccionExtra: { backgroundColor: '#fffbf5', border: '2px solid #fed7aa', borderRadius: 14, padding: '18px 20px' },
+  fueraHorarioEncabezado: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 },
+  fueraHorarioDetalle: { marginTop: 16, borderTop: '1px solid #fed7aa', paddingTop: 16 },
+  fueraHorarioPreview: { fontSize: 14, color: '#92400e', backgroundColor: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 8, padding: '8px 12px', margin: '10px 0 0', fontWeight: '600' },
+  chipTipo:   { padding: '8px 14px', borderRadius: 10, fontSize: 14, fontWeight: '600', cursor: 'pointer' },
+  sufijo:     { fontSize: 16, fontWeight: '700', color: '#4b7062', padding: '0 8px' },
 
   disponibleFila: { display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' },
   toggle:         { width: 52, height: 28, borderRadius: 14, cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 },
   toggleCirculo:  { position: 'absolute', top: 3, width: 22, height: 22, borderRadius: '50%', backgroundColor: '#fff', transition: 'transform 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' },
 
-  errorTexto:     { fontSize: 16, color: '#dc2626', fontWeight: '600', margin: 0 },
-  exitoTexto:     { fontSize: 16, color: '#085041', fontWeight: '700', backgroundColor: '#E1F5EE', padding: '12px 16px', borderRadius: 10, margin: 0 },
-  boton:          { padding: '16px', fontSize: 18, backgroundColor: '#F97316', color: '#fff', border: 'none', borderRadius: 10, fontWeight: '800', cursor: 'pointer' },
-  botonSecundario:{ padding: '14px', fontSize: 16, backgroundColor: 'transparent', color: '#1D9E75', border: '2px solid #1D9E75', borderRadius: 10, fontWeight: '700', cursor: 'pointer' },
+  errorTexto:      { fontSize: 16, color: '#dc2626', fontWeight: '600', margin: 0 },
+  exitoTexto:      { fontSize: 16, color: '#085041', fontWeight: '700', backgroundColor: '#E1F5EE', padding: '12px 16px', borderRadius: 10, margin: 0 },
+  boton:           { padding: '16px', fontSize: 18, backgroundColor: '#F97316', color: '#fff', border: 'none', borderRadius: 10, fontWeight: '800', cursor: 'pointer' },
+  botonSecundario: { padding: '14px', fontSize: 16, backgroundColor: 'transparent', color: '#1D9E75', border: '2px solid #1D9E75', borderRadius: 10, fontWeight: '700', cursor: 'pointer' },
 };
 
 export default MiPerfilMaestroPage;
