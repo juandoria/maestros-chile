@@ -7,6 +7,7 @@ import MaestrosPage from './pages/MaestrosPage';
 import MaestroPerfilPage from './pages/MaestroPerfilPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import MiPerfilMaestroPage from './pages/MiPerfilMaestroPage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
           <Route path="/registro-maestro" element={<RegisterPage />} />
+          <Route path="/mi-perfil-maestro" element={<MiPerfilMaestroPage />} />
         </Routes>
         <Footer />
       </BrowserRouter>

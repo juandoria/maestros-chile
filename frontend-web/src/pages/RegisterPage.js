@@ -34,7 +34,7 @@ function RegisterPage() {
     try {
       await createUserWithEmailAndPassword(auth, form.email, form.password);
       await createPerfil({ nombre: form.nombre, telefono: form.telefono, comuna: form.comuna });
-      navigate('/');
+      navigate('/mi-perfil-maestro');
     } catch (err) {
       setError(ERRORES[err.code] || 'Ocurrió un error al crear la cuenta. Intente de nuevo.');
     } finally {

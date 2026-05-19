@@ -8,7 +8,8 @@ async function getMaestros(req, res) {
     const { oficio, comuna } = req.query;
     let query = db.collection(COLLECTION);
 
-    if (oficio) query = query.where('oficio', '==', oficio);
+    // Soporta tanto 'oficios' (array nuevo) como 'oficio' (campo legado)
+    if (oficio) query = query.where('oficios', 'array-contains', oficio);
     if (comuna) query = query.where('comuna', '==', comuna);
 
     const snapshot = await query.get();
@@ -17,6 +18,25 @@ async function getMaestros(req, res) {
     res.json(maestros);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener maestros' });
+  }
+}
+
+// GET /api/maestros/mi-perfil  (requiere token — devuelve el perfil del maestro autenticado)
+async function getMiPerfil(req, res) {
+  try {
+    const snapshot = await db.collection(COLLECTION)
+      .where('uid', '==', req.user.uid)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return res.status(404).json({ error: 'No tienes perfil de maestro aún' });
+    }
+
+    const doc = snapshot.docs[0];
+    res.json({ id: doc.id, ...doc.data() });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener tu perfil' });
   }
 }
 
@@ -38,19 +58,22 @@ async function getMaestroById(req, res) {
 // POST /api/maestros  (requiere token)
 async function createMaestro(req, res) {
   try {
-    const { nombre, oficio, comuna, descripcion, precioPorHora } = req.body;
+    const { nombre, oficios, oficio, comuna, descripcion, precioPorHora, especialidades, horario, fotoUrl, disponible } = req.body;
 
     const nuevoPerfil = {
       uid: req.user.uid,
-      nombre,
-      oficio,
-      comuna,
-      descripcion,
-      precioPorHora, // en CLP
-      calificacion: 0,
-      totalReseñas: 0,
-      disponible: true,
-      creadoEn: new Date().toISOString(),
+      nombre:        nombre        || '',
+      oficios:       oficios       || (oficio ? [oficio] : []),
+      comuna:        comuna        || '',
+      descripcion:   descripcion   || '',
+      precioPorHora: precioPorHora || 0,
+      especialidades: especialidades || [],
+      horario:       horario       || null,
+      fotoUrl:       fotoUrl       || '',
+      disponible:    disponible    ?? true,
+      calificacion:  0,
+      totalReseñas:  0,
+      creadoEn:      new Date().toISOString(),
     };
 
     const docRef = await db.collection(COLLECTION).add(nuevoPerfil);
@@ -74,10 +97,20 @@ async function updateMaestro(req, res) {
       return res.status(403).json({ error: 'No tienes permiso para editar este perfil' });
     }
 
-    const { nombre, oficio, comuna, descripcion, precioPorHora, disponible } = req.body;
-    const cambios = { nombre, oficio, comuna, descripcion, precioPorHora, disponible };
+    const { nombre, oficios, oficio, comuna, descripcion, precioPorHora, especialidades, horario, fotoUrl, disponible } = req.body;
 
-    // Elimina campos undefined para no sobrescribir con null
+    const cambios = {
+      nombre,
+      oficios: oficios || (oficio ? [oficio] : undefined),
+      comuna,
+      descripcion,
+      precioPorHora,
+      especialidades,
+      horario,
+      fotoUrl,
+      disponible,
+    };
+
     Object.keys(cambios).forEach((k) => cambios[k] === undefined && delete cambios[k]);
 
     await docRef.update(cambios);
@@ -87,4 +120,4 @@ async function updateMaestro(req, res) {
   }
 }
 
-module.exports = { getMaestros, getMaestroById, createMaestro, updateMaestro };
+module.exports = { getMaestros, getMiPerfil, getMaestroById, createMaestro, updateMaestro };
