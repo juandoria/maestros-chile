@@ -101,7 +101,7 @@ const s = {
     fontSize: 16, fontWeight: '700', cursor: 'pointer',
   },
   botonVerTodos: {
-    padding: '14px 36px', backgroundColor: '#1D9E75', color: '#ffffff',
+    padding: '14px 36px', backgroundColor: '#F97316', color: '#ffffff',
     border: 'none', borderRadius: 10, fontSize: 18, fontWeight: '700', cursor: 'pointer',
   },
 };

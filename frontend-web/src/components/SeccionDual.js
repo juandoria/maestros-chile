@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaStar, FaMapMarkerAlt, FaTag } from 'react-icons/fa';
+import { useResponsive } from '../hooks/useResponsive';
 
 const CATEGORIAS = [
   { nombre: 'Electricista',  icono: '⚡', desc: 'Instalaciones eléctricas' },
@@ -91,14 +92,16 @@ const PRODUCTOS = [
 
 /* ---------- columna de productos auspiciados ---------- */
 function ProductosAuspiciados() {
+  const { isMobile } = useResponsive();
+  const centrado = isMobile ? { textAlign: 'center' } : {};
   return (
     <div style={s.columnaProducts}>
-      <div style={s.colTitulo}>
-        <h2 style={s.tituloCol}>
+      <div style={{ ...s.colTitulo, ...centrado }}>
+        <h2 style={{ ...s.tituloCol, ...centrado }}>
           <FaTag size={16} color="#c0392b" style={{ verticalAlign: 'middle', marginRight: 8 }} />
           Productos destacados
         </h2>
-        <p style={s.subtituloCol}>Herramientas para el trabajo</p>
+        <p style={{ ...s.subtituloCol, ...centrado }}>Herramientas para el trabajo</p>
       </div>
 
       <div style={s.productosLista}>
@@ -124,6 +127,8 @@ function ProductosAuspiciados() {
 /* ---------- componente principal: tres columnas ---------- */
 function SeccionDual({ maestros }) {
   const navigate = useNavigate();
+  const { isMobile } = useResponsive();
+  const centrado = isMobile ? { textAlign: 'center' } : {};
 
   return (
     <section style={s.seccion}>
@@ -131,9 +136,9 @@ function SeccionDual({ maestros }) {
 
         {/* Columna izquierda — categorías */}
         <div style={s.columnaIzq}>
-          <div style={s.colTitulo}>
-            <h2 style={s.tituloCol}>Categorías de oficios</h2>
-            <p style={s.subtituloCol}>Toque el oficio que necesita</p>
+          <div style={{ ...s.colTitulo, ...centrado }}>
+            <h2 style={{ ...s.tituloCol, ...centrado }}>Categorías de oficios</h2>
+            <p style={{ ...s.subtituloCol, ...centrado }}>Toque el oficio que necesita</p>
           </div>
 
           <div style={s.grilla}>
@@ -157,12 +162,12 @@ function SeccionDual({ maestros }) {
 
         {/* Columna central — maestros destacados con scroll */}
         <div style={s.columnaDer}>
-          <div style={s.colTitulo}>
-            <h2 style={s.tituloCol}>
+          <div style={{ ...s.colTitulo, ...centrado }}>
+            <h2 style={{ ...s.tituloCol, ...centrado }}>
               <FaStar size={18} color="#EF9F27" style={{ verticalAlign: 'middle', marginRight: 8 }} />
               Maestros destacados
             </h2>
-            <p style={s.subtituloCol}>Pasa el cursor para pausar</p>
+            <p style={{ ...s.subtituloCol, ...centrado }}>Pasa el cursor para pausar</p>
           </div>
 
           <MaestrosScroll maestros={maestros} />
@@ -225,7 +230,7 @@ const s = {
   categoriaNombre: { fontSize: 16, fontWeight: '800', color: '#0f2a22', textAlign: 'center' },
   categoriaDesc:   { fontSize: 13, color: '#4b7062', textAlign: 'center', lineHeight: 1.3 },
   botonVerTodos: {
-    width: '100%', padding: '13px', backgroundColor: '#1D9E75',
+    width: '100%', padding: '13px', backgroundColor: '#F97316',
     color: '#fff', border: 'none', borderRadius: 10,
     fontSize: 16, fontWeight: '700', cursor: 'pointer',
   },
@@ -264,7 +269,7 @@ const s = {
   calNum:      { marginLeft: 6, fontSize: 14, fontWeight: '700', color: '#4b7062' },
   precio:      { fontSize: 16, fontWeight: '800', color: '#1D9E75' },
   botonContactar: {
-    backgroundColor: '#1D9E75', color: '#fff', border: 'none',
+    backgroundColor: '#F97316', color: '#fff', border: 'none',
     borderRadius: 8, padding: '10px 14px',
     fontSize: 15, fontWeight: '700', cursor: 'pointer',
   },

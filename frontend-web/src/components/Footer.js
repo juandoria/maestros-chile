@@ -36,11 +36,11 @@ const s = {
   logo: { display: 'flex', alignItems: 'center', gap: 10 },
   logoTexto: { fontSize: 20, fontWeight: '800', color: '#E1F5EE' },
   link: {
-    color: '#EF9F27',
+    color: '#F97316',
     textDecoration: 'none',
     fontSize: 18,
     fontWeight: '700',
-    borderBottom: '2px solid #EF9F27',
+    borderBottom: '2px solid #F97316',
     paddingBottom: 2,
   },
   copyright: {

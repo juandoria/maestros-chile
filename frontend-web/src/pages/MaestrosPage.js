@@ -172,7 +172,7 @@ const s = {
   vacioTitulo: { fontSize: 22, fontWeight: '700', color: '#0f2a22', marginBottom: 10 },
   vacioDesc: { fontSize: 18, color: '#4b7062', marginBottom: 28 },
   botonVerde: {
-    padding: '14px 28px', backgroundColor: '#1D9E75', color: '#fff',
+    padding: '14px 28px', backgroundColor: '#F97316', color: '#fff',
     border: 'none', borderRadius: 10, fontSize: 18, fontWeight: '700', cursor: 'pointer',
   },
 };

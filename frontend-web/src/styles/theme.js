@@ -3,6 +3,8 @@ export const colores = {
   verdeClaro:   '#E1F5EE',
   verdeOscuro:  '#085041',
   verdeHover:   '#178a63',
+  naranja:      '#F97316',
+  naranjaHover: '#ea6a0e',
   dorado:       '#EF9F27',
   doradoFondo:  '#FEF3DC',
   blanco:       '#ffffff',
