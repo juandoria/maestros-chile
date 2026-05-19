@@ -32,3 +32,9 @@ export const getPerfil = () =>
 
 export const createPerfil = (datos) =>
   api.post('/usuarios/perfil', datos);
+
+export const getReseñas = (maestroId) =>
+  api.get(`/maestros/${maestroId}/reseñas`);
+
+export const createReseña = (maestroId, datos) =>
+  api.post(`/maestros/${maestroId}/reseñas`, datos);

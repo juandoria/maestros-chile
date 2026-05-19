@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const maestrosRoutes = require('./routes/maestros');
 const usuariosRoutes = require('./routes/usuarios');
+const reseñasRoutes  = require('./routes/reseñas');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,6 +14,7 @@ app.use(express.json());
 
 // Rutas
 app.use('/api/maestros', maestrosRoutes);
+app.use('/api/maestros/:id/reseñas', reseñasRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 
 // Ruta de salud — útil para verificar que el servidor está corriendo

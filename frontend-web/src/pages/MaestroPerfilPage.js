@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaStar, FaMapMarkerAlt, FaWhatsapp } from 'react-icons/fa';
-import { getMaestroById } from '../services/api';
+import { getMaestroById, getReseñas } from '../services/api';
 import { useResponsive } from '../hooks/useResponsive';
+import FormularioReseña from '../components/FormularioReseña';
 
 const ICONOS = {
   'Electricista': '⚡', 'Gasfíter': '🔧', 'Carpintero': '🪚',
@@ -23,20 +24,34 @@ function Estrellas({ valor }) {
   );
 }
 
+const LABELS_CATEGORIAS = {
+  puntualidad: '⏰ Puntualidad',
+  calidad:     '⭐ Calidad',
+  trato:       '😊 Trato',
+  limpieza:    '🧹 Limpieza',
+  precioJusto: '💰 Precio',
+};
+
 function MaestroPerfilPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [maestro, setMaestro] = useState(null);
+  const [reseñas, setReseñas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const { isMobile } = useResponsive();
+
+  const cargarReseñas = useCallback(() => {
+    getReseñas(id).then((res) => setReseñas(res.data)).catch(() => {});
+  }, [id]);
 
   useEffect(() => {
     getMaestroById(id)
       .then((res) => setMaestro(res.data))
       .catch(() => setError('No pudimos cargar el perfil.\nVuelva atrás e intente de nuevo.'))
       .finally(() => setCargando(false));
-  }, [id]);
+    cargarReseñas();
+  }, [id, cargarReseñas]);
 
   if (cargando) {
     return <div style={s.centrado}><p style={s.cargando}>Cargando perfil...</p></div>;
@@ -140,6 +155,59 @@ function MaestroPerfilPage() {
       <p style={s.ayuda}>
         Al hacer clic se abrirá WhatsApp para escribirle directamente al maestro.
       </p>
+
+      {/* Reseñas existentes */}
+      {reseñas.length > 0 && (
+        <div style={s.seccion}>
+          <p style={s.seccionLabel}>💬 Reseñas ({reseñas.length})</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {reseñas.map((r) => (
+              <div key={r.id} style={s.reseñaCard}>
+                <div style={s.reseñaEncabezado}>
+                  <strong style={s.reseñaAutor}>{r.clienteNombre}</strong>
+                  <span style={s.reseñaFecha}>
+                    {new Date(r.creadoEn).toLocaleDateString('es-CL')}
+                  </span>
+                </div>
+                {r.categorias && Object.keys(r.categorias).length > 0 && (
+                  <div style={s.categoriasGrid}>
+                    {Object.entries(r.categorias).map(([key, val]) => (
+                      <div key={key} style={s.categoriaItem}>
+                        <span style={s.categoriaLabel}>{LABELS_CATEGORIAS[key] || key}</span>
+                        <span style={s.categoriaValor}>
+                          {[1,2,3,4,5].map((n) => (
+                            <FaStar key={n} size={13} color={n <= val ? '#F97316' : '#d1d5db'} />
+                          ))}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {r.comentario && <p style={s.reseñaComentario}>"{r.comentario}"</p>}
+                <div style={s.reseñaPromedio}>
+                  <FaStar size={15} color="#F97316" />
+                  <span style={{ marginLeft: 5, fontWeight: '800', color: '#F97316' }}>
+                    {r.calificacion.toFixed(1)}
+                  </span>
+                  <span style={{ marginLeft: 4, color: '#4b7062', fontSize: 14 }}>promedio</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Formulario nueva reseña */}
+      <div style={s.seccion}>
+        <p style={s.seccionLabel}>✍️ Dejar una reseña</p>
+        <FormularioReseña
+          maestroId={id}
+          onReseñaEnviada={() => {
+            cargarReseñas();
+            getMaestroById(id).then((res) => setMaestro(res.data)).catch(() => {});
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -199,6 +267,19 @@ const s = {
     marginBottom: 14,
   },
   ayuda: { textAlign: 'center', fontSize: 16, color: '#4b7062', lineHeight: 1.5 },
+  reseñaCard: {
+    backgroundColor: '#fafafa', border: '1.5px solid #e5e7eb',
+    borderRadius: 12, padding: '14px 18px',
+  },
+  reseñaEncabezado: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  reseñaAutor: { fontSize: 16, color: '#0f2a22' },
+  reseñaFecha: { fontSize: 13, color: '#9ca3af' },
+  categoriasGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px', marginBottom: 10 },
+  categoriaItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  categoriaLabel: { fontSize: 13, color: '#4b7062' },
+  categoriaValor: { display: 'inline-flex', gap: 2 },
+  reseñaComentario: { fontSize: 15, color: '#4b7062', fontStyle: 'italic', margin: '8px 0' },
+  reseñaPromedio: { display: 'flex', alignItems: 'center', marginTop: 8 },
 };
 
 export default MaestroPerfilPage;
